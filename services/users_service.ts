@@ -1,19 +1,29 @@
-import User from '#models/user'
+import User from '#models/User'
 
 export default class UsersService {
-    async login(email: string, password: string) {
-        const user = await User.verifyCredentials(email, password)
-        const token = await User.accessTokens.create(user)
-    
-        return {
-          type: 'bearer',
-          value: token.value!.release(),
-        }
+  async login(email: string, password: string) {
+    const user = await User.verifyCredentials(email, password)
+    const tokens = await User.accessTokens.all(user)
+    const validToken = tokens.find((token) => !token.isExpired())
+    if (validToken) return {
+      message: 'User logged in',
+      type: 'bearer',
+      value: validToken.value!.release(),
     }
+
+    if(tokens.length) await Promise.all(
+      tokens.map((token) => User.accessTokens.delete(user, token.identifier))
+    )
+    const recentlyUsedToken = await User.accessTokens.create(user, ['*'], { expiresIn: '10 days' })
+    
+    return {
+      message: 'User logged in',
+      type: 'bearer',
+      value: recentlyUsedToken.value!.release(),
+    }
+  }
     async show(id: any) {
         const user = await User.findOrFail(id)
-        if(!user) throw new Error('User not found')
-
         return {
             message: 'User found',
             user
@@ -32,8 +42,6 @@ export default class UsersService {
 
     async update(id: number, data: object){
         const user = await User.findOrFail(id)
-        if(!user) throw new Error('User not found')
-
         user.merge(data)
         await user.save()
 
@@ -45,8 +53,6 @@ export default class UsersService {
 
     async delete(id: number){
         const user = await User.findOrFail(id)
-        if(!user) throw new Error('User not found')
-
         await user.delete()
 
         return {

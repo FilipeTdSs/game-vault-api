@@ -1,12 +1,13 @@
 
 import type { HttpContext } from '@adonisjs/core/http'
 import UsersService from '#services/users_service'
+import { loginValidator } from '#validators/authLogin'
+import { createOrUpdateUserValidator } from '#validators/authUser'
 
 
 export default class UsersController {
   async login({ request }: HttpContext) {
-    const { email, password } = request.all()
-    if(!email || !password) throw new Error('Invalid credentials')
+    const { email, password } = await request.validateUsing(loginValidator)
 
     return new UsersService().login(email, password)
   }
@@ -17,22 +18,19 @@ export default class UsersController {
     }
 
     async store({ request }: HttpContext) {
-        const data = request.only(['email', 'password'])
+        const data = await request.validateUsing(createOrUpdateUserValidator)
 
         return new UsersService().store(data)
     }
 
-    async update({ params, request }: HttpContext) {        
-        const data = request.only(['email', 'password', 'full_name'])
+    async update({ params, request }: HttpContext) {
+        const data = await request.validateUsing(createOrUpdateUserValidator)
         const id = params.id
 
         return new UsersService().update(id, data)
     }
 
     async delete({ params }: HttpContext) {
-        const id = params.id
-        if(!id) throw new Error('User not found')
-
         return new UsersService().delete(params.id)
     }
 }

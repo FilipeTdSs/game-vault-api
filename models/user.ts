@@ -18,6 +18,9 @@ export default class User extends compose(BaseModel, AuthFinder) {
   declare full_name: string | null
 
   @column()
+  declare cpf: string
+
+  @column()
   declare email: string
 
   @column({ serializeAs: null })
@@ -30,4 +33,5 @@ export default class User extends compose(BaseModel, AuthFinder) {
   declare updatedAt: DateTime | null
 
   static accessTokens = DbAccessTokensProvider.forModel(User)
+ 
 }
