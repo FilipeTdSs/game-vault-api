@@ -1,47 +1,32 @@
-import User from '#models/user'
+
 import type { HttpContext } from '@adonisjs/core/http'
+import UsersService from '#services/users_service'
+import User from '#models/user'
+
 
 export default class UsersController {
  async show({ params }: HttpContext) {
-        const user = await User.findOrFail(params.id)
-        return {
-            message: 'User found',
-            user
-        }
+        const id = params.id
+        return new UsersService().show(id)
     }
 
     async store({ request }: HttpContext) {
-        console.log('request:', request)
         const data = request.only(['email', 'password'])
-        const user = await User.create(data)
-        return {
-            message: 'User created',
-            user
-        }
+
+        return new UsersService().store(data)
     }
 
-    async update({ params, request }: HttpContext) {
-        const user = await User.findOrFail(params.id)
-        
-        if(!user) throw new Error('User not found')
-
+    async update({ params, request }: HttpContext) {        
         const data = request.only(['email', 'password', 'full_name'])
+        const id = params.id
 
-        user.merge(data)
-        await user.save()
-        return {
-            message: 'User updated',
-            user
-        }
+        return new UsersService().update(id, data)
     }
 
-    async destroy({ params }: HttpContext) {
+    async delete({ params }: HttpContext) {
         const user = await User.findOrFail(params.id)
         await user.delete()
 
-        return {
-            message: 'User deleted',
-            user
-        }
+        return new UsersService().delete(params.id)
     }
 }
