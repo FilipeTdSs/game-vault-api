@@ -1,6 +1,15 @@
 import User from '#models/user'
 
 export default class UsersService {
+    async login(email: string, password: string) {
+        const user = await User.verifyCredentials(email, password)
+        const token = await User.accessTokens.create(user)
+    
+        return {
+          type: 'bearer',
+          value: token.value!.release(),
+        }
+    }
     async show(id: any) {
         const user = await User.findOrFail(id)
         if(!user) throw new Error('User not found')
