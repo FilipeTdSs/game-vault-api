@@ -1,4 +1,4 @@
-import User from '#models/User'
+import User from '#models/user'
 
 export default class UsersService {
   async login(email: string, password: string) {

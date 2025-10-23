@@ -18,7 +18,7 @@ export default class User extends compose(BaseModel, AuthFinder) {
   declare full_name: string | null
 
   @column()
-  declare cpf: string
+  declare cpf: string | null
 
   @column()
   declare email: string
@@ -33,5 +33,11 @@ export default class User extends compose(BaseModel, AuthFinder) {
   declare updatedAt: DateTime | null
 
   static accessTokens = DbAccessTokensProvider.forModel(User)
- 
+
+  // Hash password before saving
+  static async beforeSave(user: User) {
+    if (user.$dirty.password) {
+      user.password = await hash.use('scrypt').make(user.password)
+    }
+  }
 }
