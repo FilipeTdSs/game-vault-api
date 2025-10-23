@@ -1,6 +1,6 @@
 
 import type { HttpContext } from '@adonisjs/core/http'
-import UsersService from '#services/users_service'
+import UsersService from '#services/usersService'
 import { loginValidator } from '#validators/authLogin'
 import { createOrUpdateUserValidator } from '#validators/authUser'
 
